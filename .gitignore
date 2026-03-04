@@ -1,0 +1,16 @@
+## Helm ###
+# Chart dependencies
+**/charts/*.tgz
+charts/**/charts
+charts/**/Chart.lock
+
+# temporary stuff
+*.tmp
+*.*~
+
+# environment vars
+.env
+.envrc
+
+# JetBrains IDEs
+.idea
