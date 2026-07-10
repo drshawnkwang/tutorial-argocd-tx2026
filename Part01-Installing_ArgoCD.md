@@ -72,33 +72,36 @@ All pods should show `Running`.
 
 ## Access the ArgoCD UI
 
-Since you are connected to your VM via SSH, you need an SSH tunnel to reach the ArgoCD UI in your local browser. This requires **two terminal sessions**.
+You are currently in **Terminal 1** (your SSH session on the VM). You will need to open **two additional terminals** on your laptop. Terminals 2 and 3 will be tied up for the rest of the tutorial -- continue working in Terminal 1 for all remaining exercises.
 
-**Terminal 1 -- start port-forward on the VM:**
-
-```bash
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
-
-> Leave this running. Open a second terminal for the SSH tunnel.
-
-**Terminal 2 -- open an SSH tunnel from your laptop:**
+**Terminal 2** -- open a new terminal on your laptop, SSH to your VM, and start port-forward:
 
 ```bash
-ssh -L 8080:localhost:8080 student@<your-vm-ip>
+ssh student@<your-vm-ip>
+kubectl port-forward svc/argocd-server -n argocd 8443:443
 ```
 
-Open `https://localhost:8080` in your browser. Accept the self-signed certificate warning.
+> Leave this running.
+
+**Terminal 3** -- open another terminal on your laptop for the SSH tunnel:
+
+```bash
+ssh -C -N -L 8443:localhost:8443 student@<your-vm-ip>
+```
+
+> Leave this running.
+
+Open `https://localhost:8443` in your browser. Accept the self-signed certificate warning.
 
 ### Fallback: NodePort
 
 If the SSH tunnel does not work, you can expose ArgoCD via a NodePort instead:
 
 ```bash
-kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 443, "targetPort": 8080, "nodePort": 30443}]}}'
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 443, "targetPort": 8443, "nodePort": 30443}]}}'
 ```
 
-Open `https://<your-vm-ip>:30443` in your browser (requires that port 30443 is open in your VM's firewall).
+Open `https://<your-vm-ip>:30443` in your browser. Accept the self-signed certificate warning (requires that port 30443 is open in your VM's firewall).
 
 ## Log In
 
@@ -115,8 +118,19 @@ Log in via the browser UI. Optionally change the password under User Info.
 
 ## Verify
 
+Run this in **Terminal 1** (your main VM session).
+
+**If using SSH tunnel (Terminals 2 + 3):**
+
 ```bash
-argocd login localhost:8080 --insecure
+argocd login localhost:8443 --insecure
+argocd cluster list
+```
+
+**If using NodePort:**
+
+```bash
+argocd login <your-vm-ip>:30443 --insecure
 argocd cluster list
 ```
 
