@@ -15,6 +15,21 @@ kubectl get pods -n kube-system
 
 You should see one node in `Ready` state.
 
+## Fork and Clone the Tutorial Repository
+
+This tutorial uses a Git repository containing exercise files, configuration, and sample manifests.
+
+1. In your browser, fork `https://github.com/esnet/tutorial-argocd-tx2026` to your GitHub account
+2. On your VM (Terminal 1):
+
+```bash
+git clone https://github.com/<your-username>/tutorial-argocd-tx2026.git
+cd tutorial-argocd-tx2026
+ls
+```
+
+> You will work inside this directory for the rest of the tutorial. The `argocd-values.yaml` file used in the next step comes from this repo.
+
 ## What is ArgoCD?
 
 ArgoCD is a GitOps continuous delivery tool for Kubernetes. It watches a Git repository and automatically keeps your cluster in sync with what's declared in Git.
@@ -44,7 +59,7 @@ helm install argocd argo/argo-cd \
   --wait
 ```
 
-> The `argocd-values.yaml` file is provided in this repository and tuned for our single-node k3s environment.
+> This file is in the repo you just cloned. It is tuned for our single-node k3s environment.
 
 ### Step 3: Wait for pods
 

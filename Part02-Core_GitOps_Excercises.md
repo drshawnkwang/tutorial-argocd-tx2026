@@ -11,15 +11,12 @@
 
 ## Exercise 1: Deploy Your First Application
 
-### Fork and clone the template repo
+### Verify your repo
 
-1. In your browser, fork `https://github.com/esnet/tutorial-argocd-tx2026` to your GitHub account
-2. On your VM:
+You forked and cloned the tutorial repo in Part I. Make sure you are in the repo directory:
 
 ```bash
-git clone https://github.com/<your-username>/tutorial-argocd-tx2026.git
-cd tutorial-argocd-tx2026
-ls
+cd ~/tutorial-argocd-tx2026
 ```
 
 The repo contains a `p2-podinfo/` directory with a Deployment and Service for [podinfo](https://github.com/stefanprodan/podinfo), a demo microservice with a web UI.
