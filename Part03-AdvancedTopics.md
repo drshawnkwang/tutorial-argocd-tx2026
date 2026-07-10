@@ -24,7 +24,10 @@ git commit -m "Add podinfo-helm to argocd-apps"
 
 ### Create the root Application
 
+> If you're editing and pushing files from your laptop (Option A in the [GitHub Access Guide](GITHUB-ACCESS.md)), run `git pull` on the VM first to get the latest changes.
+
 ```bash
+git pull
 cp root-app.yaml.sample root-app.yaml
 # Edit root-app.yaml: replace <your-username> with your GitHub username
 (editor) root-app.yaml
@@ -33,7 +36,7 @@ argocd app create -f root-app.yaml
 
 > This is the **only** imperative `argocd app create` you'll need. Everything else goes through Git.
 
-> **Note:** ArgoCD can access public Git repos and Helm chart repos without additional configuration. For private repositories, you would need to add credentials in ArgoCD Settings > Repositories.
+**Info:** ArgoCD can access public Git repos and Helm chart repos without additional configuration. For private repositories, you would need to add credentials in ArgoCD Settings > Repositories.
 
 ### Verify
 
@@ -209,7 +212,7 @@ The directory has six files. During a sync, ArgoCD processes them in this order:
 
 Waves are set via `argocd.argoproj.io/sync-wave` annotations. Hooks are set via `argocd.argoproj.io/hook` annotations (`PreSync`, `PostSync`). Hook Jobs are automatically deleted after success (`HookSucceeded` delete policy).
 
-### Deploy via App of Apps
+### Deploy via App of Apps (again)
 
 ```bash
 cp p3-sync-waves-demo/app-sync-wave-demo.yaml.sample argocd-apps/app-sync-wave-demo.yaml

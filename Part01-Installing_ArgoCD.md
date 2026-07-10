@@ -17,6 +17,8 @@ You should see one node in `Ready` state.
 
 ## Fork and Clone the Tutorial Repository
 
+> **Git setup:** Make sure you've reviewed the [GitHub Access Guide](GITHUB-ACCESS.md) and chosen how you'll push to GitHub before continuing.
+
 This tutorial uses a Git repository containing exercise files, configuration, and sample manifests.
 
 1. In your browser, fork `https://github.com/esnet/tutorial-argocd-tx2026` to your GitHub account

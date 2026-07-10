@@ -183,7 +183,7 @@ argocd app create -f app.yaml
 argocd app sync podinfo-helm
 ```
 
-### Verify
+### Verify (again)
 
 ```bash
 kubectl get pods -n podinfo-helm
