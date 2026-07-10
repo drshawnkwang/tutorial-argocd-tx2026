@@ -2,7 +2,7 @@
 
 ## Exercise 1: App of Apps
 
-So far you've created Applications using the ArgoCD UI or CLI. The **App of Apps** pattern lets ArgoCD manage Application definitions from Git -- fully GitOps.
+So far you've created Applications using the ArgoCD UI or CLI. The **App of Apps** pattern lets ArgoCD manage Application definitions from using GitOps.
 
 ### How it works
 
@@ -12,17 +12,14 @@ A single "root" Application watches a directory in your repo. Any Application (o
 
 ```bash
 cd ~/tutorial-argocd-tx2026
-mkdir -p argocd-apps
 ```
 
 ### Add podinfo-helm to the argocd-apps directory
 
 ```bash
 cp p2-podinfo-helm/app.yaml.sample argocd-apps/podinfo-helm.yaml
-# Edit argocd-apps/podinfo-helm.yaml: replace <your-username> with your GitHub username
 git add argocd-apps/
 git commit -m "Add podinfo-helm to argocd-apps"
-git push origin main
 ```
 
 ### Create the root Application
@@ -30,6 +27,7 @@ git push origin main
 ```bash
 cp root-app.yaml.sample root-app.yaml
 # Edit root-app.yaml: replace <your-username> with your GitHub username
+(editor) root-app.yaml
 argocd app create -f root-app.yaml
 ```
 
@@ -37,11 +35,15 @@ argocd app create -f root-app.yaml
 
 ### Verify
 
-In the ArgoCD UI you should see `root-apps`. Click on it -- its resources include the `podinfo-helm` Application.
+In the ArgoCD UI you should see `root-apps`. Click on it, its resources include the `podinfo-helm` Application.
 
 ### Test the GitOps flow
 
-Edit `argocd-apps/podinfo-helm.yaml` -- change the `ui.message` value. Commit and push. Watch ArgoCD update the Application automatically.
+Edit `argocd-apps/podinfo-helm.yaml`, change the `ui.message` value. Commit and push. Then manually sync using the Web UI or
+
+```bash
+argocd app sync podinfo-helm
+```
 
 ## Exercise 2: ApplicationSets
 
@@ -66,7 +68,7 @@ git push origin main
 
 ### See templating in action
 
-Edit `argocd-apps/appset-example.yaml` -- add a second element to the list:
+Edit `argocd-apps/appset-example.yaml` , add a second element to the list:
 
 ```yaml
       - namespace: podinfo-appset-2
@@ -85,7 +87,7 @@ A second Application appears. Removing an element from the list deletes the corr
 
 ### Clean up
 
-Remove the ApplicationSet from `argocd-apps/` and push -- `root-apps` will prune it automatically:
+Remove the ApplicationSet from `argocd-apps/` and push , `root-apps` will prune it automatically:
 
 ```bash
 git rm argocd-apps/appset-example.yaml
@@ -95,7 +97,7 @@ git push origin main
 
 ## Exercise 3: Rollbacks
 
-The `podinfo-helm` Application has **no auto-sync** -- rollbacks will stick.
+The `podinfo-helm` Application has **no auto-sync** , rollbacks will stick.
 
 ### Confirm no auto-sync
 
@@ -105,15 +107,16 @@ argocd app get podinfo-helm | grep "Sync Policy"
 
 ### Break the application
 
-Edit `argocd-apps/podinfo-helm.yaml` -- change `targetRevision` to `99.99.99` (a version that doesn't exist):
+Edit `argocd-apps/podinfo-helm.yaml` , change `targetRevision` to `99.99.99` (a version that doesn't exist):
 
 ```bash
+(editor) argocd-apps/podinfo-helm.yaml
 git add argocd-apps/podinfo-helm.yaml
 git commit -m "Break podinfo-helm with invalid chart version"
 git push origin main
 ```
 
-Wait for `root-apps` to update the Application, then trigger the sync:
+Then trigger the sync:
 
 ```bash
 argocd app get root-apps --refresh
@@ -130,8 +133,8 @@ argocd app get podinfo-helm
 
 1. Click on `podinfo-helm` in the ArgoCD UI
 2. Click **HISTORY AND ROLLBACK**
-3. Find the last successful sync (green checkmark)
-4. Click the three-dot menu -> **Rollback**
+3. Find the last successful sync
+4. Click the three-dot menu -> **Redeploy**
 
 The rollback **sticks** because there's no auto-sync to override it.
 
@@ -154,7 +157,7 @@ git push origin main
 ### Key takeaway
 
 - **Without auto-sync:** ArgoCD rollback sticks. You have manual control.
-- **With auto-sync:** ArgoCD rollback is temporary -- Git will re-apply the broken state. You must fix it in Git (`git revert`).
+- **With auto-sync:** ArgoCD rollback is temporary , Git will re-apply the broken state. You must fix it in Git (`git revert`).
 
 ## Exercise 4: Sync Waves and Hooks
 
@@ -164,11 +167,11 @@ Sync waves and hooks give you control over **deployment order** and **lifecycle 
 
 The directory has six files. During a sync, ArgoCD processes them in this order:
 
-1. **PreSync hook** -- `pre-sync-job.yaml` (Job that simulates a database migration, runs before anything else)
-2. **Wave -1** -- `database.yaml` (ConfigMap deployed first among the regular resources)
-3. **Wave 0** -- `deployment.yaml` (Deployment deployed second)
-4. **Wave 1** -- `service.yaml` (Service deployed third)
-5. **PostSync hook** -- `post-sync-test.yaml` (Job that simulates a smoke test, runs after all resources are synced)
+1. **PreSync hook** : `pre-sync-job.yaml` (Job that simulates a database migration, runs before anything else)
+2. **Wave -1** : `database.yaml` (ConfigMap deployed first among the regular resources)
+3. **Wave 0** : `deployment.yaml` (Deployment deployed second)
+4. **Wave 1** : `service.yaml` (Service deployed third)
+5. **PostSync hook** : `post-sync-test.yaml` (Job that simulates a smoke test, runs after all resources are synced)
 
 Waves are set via `argocd.argoproj.io/sync-wave` annotations. Hooks are set via `argocd.argoproj.io/hook` annotations (`PreSync`, `PostSync`). Hook Jobs are automatically deleted after success (`HookSucceeded` delete policy).
 
@@ -177,14 +180,17 @@ Waves are set via `argocd.argoproj.io/sync-wave` annotations. Hooks are set via 
 ```bash
 cp p3-sync-waves-demo/app-sync-wave-demo.yaml.sample argocd-apps/app-sync-wave-demo.yaml
 # Edit: replace <your-username> with your GitHub username
+(editor) argocd-apps/app-sync-wave-demo.yaml
 git add argocd-apps/app-sync-wave-demo.yaml
 git commit -m "Add sync-waves-demo to root-apps"
 git push origin main
 ```
 
-Once `root-apps` picks it up, sync the demo:
+Then sync the demo:
 
 ```bash
+argocd app sync root-apps
+# after syncing root-apps, click on the sync-wave-demo in the Web UI
 argocd app sync sync-waves-demo
 ```
 
@@ -198,8 +204,8 @@ Click on the `sync-waves-demo` Application during the sync. You should see:
 4. The Service is created (wave 1)
 5. The PostSync Job appears, runs the smoke test, and is cleaned up
 
-The hook Jobs disappear after they succeed -- that's the `HookSucceeded` delete policy in action.
+The hook Jobs disappear after they succeed, that's the `HookSucceeded` delete policy in action.
 
 ---
 
-**Next:** Part IV -- Multi-Environment Deployments
+**Next:** Part IV - Multi-Environment Deployments
