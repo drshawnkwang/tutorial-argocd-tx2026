@@ -12,7 +12,17 @@ You edit files and run Git commands on your laptop using your preferred editor a
 
 This is the recommended approach because you use your own editor and your existing GitHub auth, and there is no extra setup on the VM.
 
-## Option B: Edit and Push from the VM Using a GitHub PAT
+## Option B: Edit on GitHub.com with the Browser Editor
+
+If you don't have Git installed locally, you can edit files directly on GitHub. Navigate to your forked repo and press `.` (period) to open a VS Code editor in your browser. Use the Source Control panel (Git icon in the left sidebar) to stage, commit, and push changes.
+
+- **Browser:** edit files, commit, push (via github.dev VS Code editor)
+- **VM:** `kubectl`, `argocd`, `curl`
+- **When the VM needs updated files** (one time in Part III): run `git pull` on the VM
+
+This assumes you are confortable with Github's VS code editor.
+
+## Option C: Edit and Push from the VM Using a GitHub PAT
 
 You do everything on the VM over SSH. You'll need a GitHub Personal Access Token (PAT) to push.
 
@@ -30,9 +40,9 @@ git config --global user.name "Your Name"
 git config --global user.email "your@email.com"
 ```
 
-On your first `git push`, enter your GitHub username and the PAT as the password. It will be cached for subsequent pushes.
+On the VM, on your first `git push`, enter your GitHub username and the PAT as the password. It will be cached for subsequent pushes.
 
-## Option C: Edit and Push from the VM Using SSH Agent Forwarding
+## Option D: Edit and Push from the VM Using SSH Agent Forwarding
 
 If you have SSH keys configured with GitHub on your laptop, you can forward your SSH agent to the VM:
 
@@ -50,11 +60,11 @@ Your laptop's SSH key is used for GitHub auth without storing credentials on the
 
 ## Summary
 
-| | Option A: Laptop | Option B: VM + PAT | Option C: VM + SSH agent |
-| --- | --- | --- | --- |
-| Edit files on | Laptop | VM | VM |
-| Git push from | Laptop | VM | VM |
-| Pre-setup needed | None (use existing Git auth) | Create a GitHub PAT | SSH keys configured with GitHub |
-| Editor | Your choice | vim/nano on VM | vim/nano on VM |
+| | Option A: Laptop | Option B: GitHub.dev | Option C: VM + PAT | Option D: VM + SSH agent |
+| --- | --- | --- | --- | --- |
+| Edit files on | Laptop | Browser | VM | VM |
+| Git push from | Laptop | Browser | VM | VM |
+| Pre-setup needed | None (use existing Git auth) | None | Create a GitHub PAT | SSH keys configured with GitHub |
+| Editor | Your choice | VS Code in browser | vim/nano on VM | vim/nano on VM |
 
-All three options work. Pick whichever you're most comfortable with.
+Please pick whichever you're most comfortable with.
