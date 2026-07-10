@@ -15,22 +15,15 @@ cd ~/tutorial-argocd-tx2026
 mkdir -p argocd-apps
 ```
 
-### Move podinfo-helm into it
+### Add podinfo-helm to the argocd-apps directory
 
 ```bash
-cp p2-podinfo-helm/app.yaml argocd-apps/podinfo-helm.yaml
+cp p2-podinfo-helm/app.yaml.sample argocd-apps/podinfo-helm.yaml
+# Edit argocd-apps/podinfo-helm.yaml: replace <your-username> with your GitHub username
 git add argocd-apps/
 git commit -m "Add podinfo-helm to argocd-apps"
 git push origin main
 ```
-
-### Delete the old podinfo-helm Application
-
-```bash
-argocd app delete podinfo-helm --cascade=false
-```
-
-(`--cascade=false` keeps the running pods -- the root app will recreate the Application.)
 
 ### Create the root Application
 
