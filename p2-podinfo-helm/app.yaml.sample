@@ -13,8 +13,11 @@ spec:
       valuesObject:
         replicaCount: 2
         ui:
-          color: "#34577c"
+          color: "#27a35a"
           message: "Helm-deployed podinfo!"
+        service:
+          type: NodePort
+          nodePort: 30899
   destination:
     server: https://kubernetes.default.svc
     namespace: podinfo-helm
