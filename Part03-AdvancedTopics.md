@@ -33,6 +33,8 @@ argocd app create -f root-app.yaml
 
 > This is the **only** imperative `argocd app create` you'll need. Everything else goes through Git.
 
+> **Note:** ArgoCD can access public Git repos and Helm chart repos without additional configuration. For private repositories, you would need to add credentials in ArgoCD Settings > Repositories.
+
 ### Verify
 
 In the ArgoCD UI you should see `root-apps`. Click on it, its resources include the `podinfo-helm` Application.
