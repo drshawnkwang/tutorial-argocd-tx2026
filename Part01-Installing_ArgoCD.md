@@ -36,9 +36,9 @@ ArgoCD is a GitOps continuous delivery tool for Kubernetes. It watches a Git rep
 
 **Core concepts:**
 
-- **Application** -- a group of Kubernetes resources defined in Git
-- **Sync** -- making the live cluster match the desired state in Git
-- **Health** -- whether deployed resources are running correctly
+- **Application** : a group of Kubernetes resources defined in Git
+- **Sync** : making the live cluster match the desired state in Git
+- **Health** : whether deployed resources are running correctly
 
 ## Install ArgoCD
 
@@ -72,9 +72,9 @@ All pods should show `Running`.
 
 ## Access the ArgoCD UI
 
-You are currently in **Terminal 1** (your SSH session on the VM). You will need to open **two additional terminals** on your laptop. Terminals 2 and 3 will be tied up for the rest of the tutorial -- continue working in Terminal 1 for all remaining exercises.
+You are currently in **Terminal 1** (your SSH session on the VM). You will need to open **two additional terminals** on your laptop. Terminals 2 and 3 will be tied up for the rest of the tutorial, continue working in Terminal 1 for all remaining exercises.
 
-**Terminal 2** -- open a new terminal on your laptop, SSH to your VM, and start port-forward:
+**Terminal 2**  open a new terminal on your laptop, SSH to your VM, and start port-forward:
 
 ```bash
 ssh student@<your-vm-ip>
@@ -83,7 +83,7 @@ kubectl port-forward svc/argocd-server -n argocd 8443:443
 
 > Leave this running.
 
-**Terminal 3** -- open another terminal on your laptop for the SSH tunnel:
+**Terminal 3**  open another terminal on your laptop for the SSH tunnel:
 
 ```bash
 ssh -C -N -L 8443:localhost:8443 student@<your-vm-ip>
@@ -138,7 +138,7 @@ You should see one cluster (the local `in-cluster`). ArgoCD is ready.
 
 ---
 
-**Next:** Part II -- Core GitOps Exercises
+**Next:** Part II - Core GitOps Exercises
 
 ---
 

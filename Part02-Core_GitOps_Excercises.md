@@ -48,7 +48,7 @@ argocd app create podinfo \
 
 ### Sync the Application
 
-The app shows **OutOfSync** -- Git has manifests but nothing is deployed yet.
+The app shows **OutOfSync**, Git has manifests but nothing is deployed yet.
 
 1. Click **SYNC** then **SYNCHRONIZE** in the UI
 
@@ -85,10 +85,11 @@ argocd app set podinfo --sync-policy automated --auto-prune --self-heal
 
 ### Test auto-sync
 
-Edit `p2-podinfo/deployment.yaml` -- change `replicas: 1` to `replicas: 3`:
+Edit `p2-podinfo/deployment.yaml`; change `replicas: 1` to `replicas: 3`:
 
 ```bash
 # Edit the file, then:
+(editor) p2-podinfo/deployment.yaml
 git add p2-podinfo/deployment.yaml
 git commit -m "Scale podinfo to 3 replicas"
 git push origin main
@@ -113,10 +114,10 @@ Watch ArgoCD detect the drift and scale back to 3. **Git always wins.**
 
 ## Exercise 3: Make Changes via Git
 
-Edit `p2-podinfo/deployment.yaml` -- make two changes:
+Edit `p2-podinfo/deployment.yaml`; make two changes:
 
 1. Upgrade the image tag from `6.13.0` to `6.14.0`
-2. Add a custom message -- find the `containers` section and add an `env:` block at the same indentation level as `image:` and `ports:`:
+2. Add a custom message,  find the `containers` section and add an `env:` block at the same indentation level as `image:` and `ports:`:
 
    ```yaml
        containers:
@@ -145,18 +146,18 @@ curl localhost:30898 | jq '{version, message}'
 # Should show version "6.14.0" and message "Hello from ArgoCD tutorial!"
 ```
 
-You can also refresh `http://<your-vm-ip>:30898` in your browser -- the message should appear in the podinfo web UI.
+You can also refresh `http://<your-vm-ip>:30898` in your browser, the message should appear in the podinfo web UI.
 
-This demonstrates that a single Git push can make multiple changes atomically -- ArgoCD syncs the full desired state, not individual edits.
+This demonstrates that a single Git push can make multiple changes atomically. ArgoCD syncs the full desired state, not individual edits.
 
 ## Exercise 4: Explore Application Details
 
 In the ArgoCD UI, click on the `podinfo` application and explore:
 
-- **Tree view** -- visual map of Deployment -> ReplicaSet -> Pods, plus Service
-- **Resource details** -- click any resource to see its manifest, events, and logs
-- **Diff tab** -- compare Git state vs live cluster state
-- **History** -- click **HISTORY AND ROLLBACK** to see every sync, with Git commit SHAs and timestamps
+- **Tree view** : visual map of Deployment -> ReplicaSet -> Pods, plus Service
+- **Resource details** : click any resource to see its manifest, events, and logs
+- **Diff tab** : compare Git state vs live cluster state
+- **History** : click **HISTORY AND ROLLBACK** to see every sync, with Git commit SHAs and timestamps
 
 ## Exercise 5: Deploy a Helm Chart
 
@@ -169,7 +170,7 @@ cd ~/tutorial-argocd-tx2026/p2-podinfo-helm
 cat app.yaml.sample
 ```
 
-This manifest points ArgoCD at the upstream podinfo Helm chart (not your Git repo). It uses **manual sync** (no auto-sync) -- we'll use this in Part III to practice rollbacks.
+This manifest points ArgoCD at the upstream podinfo Helm chart (not your Git repo). It uses **manual sync** (no auto-sync), we'll use this in Part III to practice rollbacks.
 
 ```bash
 cp app.yaml.sample app.yaml
@@ -199,9 +200,10 @@ Open both in your browser to compare.
 
 ### Modify Helm values
 
-Edit `p2-podinfo-helm/app.yaml` -- change the `ui.color` or `ui.message`, then re-apply:
+Edit `p2-podinfo-helm/app.yaml`; change the `ui.color` or `ui.message`, then re-apply:
 
 ```bash
+(editor) p2-podinfo-helm/app.yaml
 argocd app create -f app.yaml --upsert
 argocd app sync podinfo-helm
 ```
@@ -229,4 +231,4 @@ argocd app delete podinfo-helm --cascade
 
 ---
 
-**Next:** Part III -- Advanced Topics
+**Next:** Part III - Advanced Topics
