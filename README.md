@@ -4,8 +4,10 @@ A hands-on tutorial for learning GitOps with ArgoCD on Kubernetes. Designed for 
 
 ## Getting Started
 
+1. Review the [GitHub Access Guide](GITHUB-ACCESS.md) and choose how you'll push to GitHub
 1. **Fork** this repository to your GitHub account
-1. **Clone** your fork:
+1. **SSH** into your assigned VM: `ssh student@<your-vm-ip>`
+1. **Clone** your fork on the VM:
 
    ```bash
    git clone https://github.com/<your-username>/tutorial-argocd-tx2026.git
