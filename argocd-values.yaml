@@ -45,11 +45,6 @@ global:
     create: false
 
 # -- Server configuration
-configs:
-  params:
-    # Run server in insecure mode (no TLS between port-forward and server)
-    # This avoids certificate issues with port-forwarding / SSH tunnels
-    server.insecure: true
 
 # -- Reduce resource requests for tutorial VMs (e2-standard-2: 2 vCPU, 8GB RAM)
 # These are intentionally low -- this is a tutorial, not production
