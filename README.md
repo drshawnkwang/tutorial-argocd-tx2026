@@ -2,6 +2,18 @@
 
 A hands-on tutorial for learning GitOps with ArgoCD on Kubernetes. Designed for instructor-led workshops using cloud VMs with single-node k3s clusters.
 
+## Getting Started
+
+1. **Fork** this repository to your GitHub account
+1. **Clone** your fork:
+
+   ```bash
+   git clone https://github.com/<your-username>/tutorial-argocd-tx2026.git
+   cd tutorial-argocd-tx2026
+   ```
+
+1. Follow the tutorial parts in order, starting with Part I
+
 ## Tutorial Parts
 
 - [Part I: Installing ArgoCD](Part01-Installing_ArgoCD.md) - Set up ArgoCD on a k3s cluster using Helm
@@ -9,15 +21,12 @@ A hands-on tutorial for learning GitOps with ArgoCD on Kubernetes. Designed for 
 - [Part III: Advanced Topics](Part03-AdvancedTopics.md) - App of Apps, ApplicationSets, rollbacks, sync waves and hooks
 - [Part IV: Multi-Environment Deployments](Part04-MultiEnvironment.md) - Kustomize overlays for dev/staging/prod
 
-## Student Template Repository
-
-Students fork [esnet/tutorial-argocd-tx2026](https://github.com/esnet/tutorial-argocd-tx2026) and connect it to their ArgoCD instance. That repo contains the exercise files referenced throughout this tutorial.
-
 ## Prerequisites
 
-- A cloud VM with k3s installed (provided by the instructor)
-- SSH access to the VM
-- A GitHub account (for forking the template repo)
+- A Kubernetes cluster. For the instructor-led tutorial, a cloud VM with k3s installed (provided by the instructor).
+- However, a [kind](https://kind.sigs.k8s.io/) or [minikube](https://minikube.sigs.k8s.io/docs/) cluster may be used for self-instruction. Alternates include [k3s](https://k3s.io/).
+- SSH access to the VM. You will need to have a ssh public-key for the instructor-led session.
+- A GitHub account (for forking this repo).
 
 ## License
 
