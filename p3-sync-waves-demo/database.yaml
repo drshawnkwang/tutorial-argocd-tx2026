@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"  # Deploy first
+data:
+  db_host: "postgres.default.svc"
+  db_port: "5432"

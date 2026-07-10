@@ -1,0 +1,63 @@
+# argocd-values.yaml -- Tutorial values for single-node k3s
+# Chart: argo/argo-cd (v10.x, appVersion v3.x)
+
+# -- Disable HA (single-node cluster)
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+applicationSet:
+  replicas: 1
+
+# -- Disable Dex (not needed for tutorial, we use admin password)
+dex:
+  enabled: false
+
+# -- Disable network policies (single-node tutorial, simplifies networking)
+global:
+  networkPolicy:
+    create: false
+
+# -- Server configuration
+configs:
+  params:
+    # Run server in insecure mode (no TLS between port-forward and server)
+    # This avoids certificate issues with port-forwarding / SSH tunnels
+    server.insecure: true
+
+# -- Reduce resource requests for tutorial VMs (e2-standard-2: 2 vCPU, 8GB RAM)
+# These are intentionally low -- this is a tutorial, not production
+redis:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi

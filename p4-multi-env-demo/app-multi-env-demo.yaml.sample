@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: myapp-environments
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+          - env: staging
+          - env: prod
+  template:
+    metadata:
+      name: 'myapp-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/<your-username>/tutorial-argocd-tx2026
+        targetRevision: HEAD
+        path: 'p4-multi-env-demo/overlays/{{env}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{env}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

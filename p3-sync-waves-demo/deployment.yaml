@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"  # Deploy second (default)
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          envFrom:
+            - configMapRef:
+                name: database-config

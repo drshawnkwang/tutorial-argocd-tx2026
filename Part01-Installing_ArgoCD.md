@@ -1,0 +1,124 @@
+# Part I: Installing ArgoCD
+
+## Connect to Your VM
+
+```bash
+ssh student@<your-vm-ip>
+```
+
+Verify the cluster is ready:
+
+```bash
+kubectl get nodes
+kubectl get pods -n kube-system
+```
+
+You should see one node in `Ready` state.
+
+## What is ArgoCD?
+
+ArgoCD is a GitOps continuous delivery tool for Kubernetes. It watches a Git repository and automatically keeps your cluster in sync with what's declared in Git.
+
+**Core concepts:**
+
+- **Application** -- a group of Kubernetes resources defined in Git
+- **Sync** -- making the live cluster match the desired state in Git
+- **Health** -- whether deployed resources are running correctly
+
+## Install ArgoCD
+
+### Step 1: Create the namespace
+
+```bash
+kubectl create namespace argocd
+```
+
+### Step 2: Install ArgoCD via Helm
+
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+helm install argocd argo/argo-cd \
+  --namespace argocd \
+  --values argocd-values.yaml \
+  --wait
+```
+
+> The `argocd-values.yaml` file is provided in this repository and tuned for our single-node k3s environment.
+
+### Step 3: Wait for pods
+
+```bash
+kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
+kubectl get pods -n argocd
+```
+
+All pods should show `Running`.
+
+## Access the ArgoCD UI
+
+Since you are connected to your VM via SSH, you need an SSH tunnel to reach the ArgoCD UI in your local browser. This requires **two terminal sessions**.
+
+**Terminal 1 -- start port-forward on the VM:**
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+> Leave this running. Open a second terminal for the SSH tunnel.
+
+**Terminal 2 -- open an SSH tunnel from your laptop:**
+
+```bash
+ssh -L 8080:localhost:8080 student@<your-vm-ip>
+```
+
+Open `https://localhost:8080` in your browser. Accept the self-signed certificate warning.
+
+### Fallback: NodePort
+
+If the SSH tunnel does not work, you can expose ArgoCD via a NodePort instead:
+
+```bash
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 443, "targetPort": 8080, "nodePort": 30443}]}}'
+```
+
+Open `https://<your-vm-ip>:30443` in your browser (requires that port 30443 is open in your VM's firewall).
+
+## Log In
+
+Get the initial admin password:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+- **Username:** `admin`
+- **Password:** (output from above)
+
+Log in via the browser UI. Optionally change the password under User Info.
+
+## Verify
+
+```bash
+argocd login localhost:8080 --insecure
+argocd cluster list
+```
+
+You should see one cluster (the local `in-cluster`). ArgoCD is ready.
+
+---
+
+**Next:** Part II -- Core GitOps Exercises
+
+---
+
+## Appendix: Install ArgoCD with raw manifests
+
+If you prefer not to use Helm, you can install ArgoCD by applying the upstream manifest directly:
+
+```bash
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+This installs the latest stable release with default settings. Note that the Helm-based install (Step 2 above) is recommended for this tutorial because it uses a values file tuned for our single-node k3s environment.
