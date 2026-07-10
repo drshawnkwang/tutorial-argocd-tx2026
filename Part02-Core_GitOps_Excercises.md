@@ -62,17 +62,20 @@ argocd app sync podinfo
 
 ```bash
 kubectl get pods -l app=podinfo
-kubectl port-forward svc/podinfo 9898:9898 &
-curl localhost:9898 | jq .
+curl localhost:30898 | jq .
 ```
 
 You should see podinfo's JSON response with version `6.13.0`.
+
+The podinfo service is exposed as a NodePort on port **30898**. You can also open `http://<your-vm-ip>:30898` in your browser to see the podinfo web UI.
 
 ## Exercise 2: Enable Auto-Sync and Self-Heal
 
 ### Enable auto-sync
 
-In the ArgoCD UI: click on the `podinfo` app -> **APP DETAILS** -> **ENABLE AUTO-SYNC**. Enable **Prune** and **Self Heal**.
+In the ArgoCD UI: click on the `podinfo` app -> **DETAILS** -> **Edit** -> **Sync Policy** -> **ENABLE AUTO-SYNC**. Also Enable **Prune** and **Self Heal**.
+
+Click **Save**.
 
 Or via CLI:
 
@@ -110,42 +113,41 @@ Watch ArgoCD detect the drift and scale back to 3. **Git always wins.**
 
 ## Exercise 3: Make Changes via Git
 
-### Change 1: Upgrade the image
+Edit `p2-podinfo/deployment.yaml` -- make two changes:
 
-Edit `p2-podinfo/deployment.yaml` -- change the image tag from `6.13.0` to `6.14.0`:
+1. Upgrade the image tag from `6.13.0` to `6.14.0`
+2. Add a custom message -- find the `containers` section and add an `env:` block at the same indentation level as `image:` and `ports:`:
+
+   ```yaml
+       containers:
+       - name: podinfo
+         image: ghcr.io/stefanprodan/podinfo:6.14.0   # <-- updated
+         ports:
+         - containerPort: 9898
+           name: http
+         env:                                          # <-- add from here
+         - name: PODINFO_UI_MESSAGE
+           value: "Hello from ArgoCD tutorial!"
+   ```
+
+Commit and push both changes together:
 
 ```bash
 git add p2-podinfo/deployment.yaml
-git commit -m "Upgrade podinfo to 6.14.0"
+git commit -m "Upgrade podinfo to 6.14.0 and set custom message"
 git push origin main
 ```
 
-Verify:
+Verify (after ArgoCD syncs):
 
 ```bash
-curl localhost:9898 | jq .version
-# Should show "6.14.0"
+curl localhost:30898 | jq '{version, message}'
+# Should show version "6.14.0" and message "Hello from ArgoCD tutorial!"
 ```
 
-### Change 2: Add resource limits
+You can also refresh `http://<your-vm-ip>:30898` in your browser -- the message should appear in the podinfo web UI.
 
-Edit `p2-podinfo/deployment.yaml` -- add resource requests and limits to the container spec. Commit and push.
-
-### Change 3: Set a custom message
-
-Add an environment variable to the container:
-
-```yaml
-env:
-- name: PODINFO_UI_MESSAGE
-  value: "Hello from ArgoCD tutorial!"
-```
-
-Commit, push, then verify:
-
-```bash
-curl localhost:9898 | jq .message
-```
+This demonstrates that a single Git push can make multiple changes atomically -- ArgoCD syncs the full desired state, not individual edits.
 
 ## Exercise 4: Explore Application Details
 
@@ -184,12 +186,16 @@ argocd app sync podinfo-helm
 
 ```bash
 kubectl get pods -n podinfo-helm
-kubectl port-forward svc/podinfo-helm-podinfo 9899:9898 -n podinfo-helm &
-curl localhost:9899 | jq .message
+curl localhost:30899 | jq .message
 # Should show "Helm-deployed podinfo!"
 ```
 
-You now have two podinfo instances: one from plain manifests (port 9898), one from Helm (port 9899).
+You now have two podinfo instances:
+
+- Plain manifests: `http://<your-vm-ip>:30898`
+- Helm chart: `http://<your-vm-ip>:30899`
+
+Open both in your browser to compare.
 
 ### Modify Helm values
 
@@ -209,6 +215,17 @@ argocd app sync podinfo-helm
 | Use case | Custom apps | Third-party software |
 
 ArgoCD handles both. In production you'll use a mix.
+
+## Cleanup
+
+Before moving to Part III, delete both Applications from Part II:
+
+```bash
+argocd app delete podinfo --cascade
+argocd app delete podinfo-helm --cascade
+```
+
+> The `--cascade` flag (default) deletes both the Application and the deployed resources (pods, service, etc.). We'll recreate `podinfo-helm` using the App of Apps pattern in Part III.
 
 ---
 
