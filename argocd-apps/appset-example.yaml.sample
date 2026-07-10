@@ -9,8 +9,9 @@ spec:
         elements:
           - namespace: podinfo-appset
             message: "Deployed by ApplicationSet!"
-            color: "#00cc00"
+            color: "#e74c3c"
             replicas: "1"
+            nodePort: "30900"
   template:
     metadata:
       name: 'podinfo-{{namespace}}'
@@ -26,6 +27,9 @@ spec:
             ui:
               color: '{{color}}'
               message: '{{message}}'
+            service:
+              type: NodePort
+              nodePort: '{{nodePort}}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
