@@ -4,15 +4,15 @@
 
 Real-world applications run in multiple environments:
 
-- **Dev** -- rapid iteration, testing new features
-- **Staging** -- pre-production validation
-- **Prod** -- live, serving users
+- **Dev** : rapid iteration, testing new features
+- **Staging** : pre-production validation
+- **Prod** : live, serving users
 
 Each environment differs in replicas, resources, image tags, and configuration. We use **Kustomize** to manage these differences without duplicating YAML.
 
 ## What is Kustomize?
 
-Kustomize lets you define a **base** configuration and **overlays** that customize it per environment. It's built into `kubectl` -- no extra tools needed.
+Kustomize lets you define a **base** configuration and **overlays** that customize it per environment. It's built into `kubectl`, no extra tools needed.
 
 ```text
 p4-multi-env-demo/
@@ -39,15 +39,15 @@ find p4-multi-env-demo -type f | sort
 
 **Base** (`p4-multi-env-demo/base/`):
 
-- `deployment.yaml` -- nginx with 1 replica and base resource limits
-- `service.yaml` -- ClusterIP on port 80
-- `kustomization.yaml` -- lists the resources
+- `deployment.yaml` : nginx with 1 replica and base resource limits
+- `service.yaml` : ClusterIP on port 80
+- `kustomization.yaml` : lists the resources
 
 **Overlays** customize the base:
 
-- **Dev** -- namespace `dev`, prefix `dev-`, 1 replica
-- **Staging** -- namespace `staging`, prefix `staging-`, 2 replicas, more memory
-- **Prod** -- namespace `prod`, prefix `prod-`, 3 replicas, much higher resources
+- **Dev** : namespace `dev`, prefix `dev-`, 1 replica
+- **Staging** : namespace `staging`, prefix `staging-`, 2 replicas, more memory
+- **Prod** : namespace `prod`, prefix `prod-`, 3 replicas, much higher resources
 
 ### Test Kustomize locally
 
@@ -84,7 +84,7 @@ cd ~/tutorial-argocd-tx2026
 cp p4-multi-env-demo/app-multi-env-demo.yaml.sample argocd-apps/myapp-environments.yaml
 
 # Edit: replace <your-username> with your GitHub username
-
+(editor) argocd-apps/myapp-environments.yaml
 git add argocd-apps/myapp-environments.yaml
 git commit -m "Add multi-environment ApplicationSet via App of Apps"
 git push origin main
@@ -98,7 +98,7 @@ git push origin main
 4. Each deploys the corresponding Kustomize overlay
 5. Namespaces are created automatically
 
-One git push. Three environments. No `kubectl create namespace`. No `argocd app create`.
+One git push creates three environments.
 
 ### Verify
 
@@ -120,12 +120,18 @@ Expected: dev = 1 replica, staging = 2, prod = 3.
 
 ### Scenario 1: Update image in staging only
 
-Edit `p4-multi-env-demo/overlays/staging/kustomization.yaml` -- add an `images` section:
+Edit `p4-multi-env-demo/overlays/staging/kustomization.yaml`. Add an `images:` block -- this is a top-level Kustomize key, at the same indentation level as `namespace:`, `resources:`, and `patches:`. Add it before the `patches:` block:
 
 ```yaml
-images:
+commonLabels:
+  environment: staging
+
+images:                    # <-- add this block
 - name: nginx
   newTag: 1.26-alpine
+
+patches:
+  - patch: |-
 ```
 
 ```bash
@@ -134,22 +140,76 @@ git commit -m "Update staging to nginx 1.26-alpine"
 git push origin main
 ```
 
-Watch the ArgoCD UI -- staging updates, dev and prod are unchanged.
+Sync all the staging environment. To use the CLI:
+
+```bash
+argocd app sync myapp-staging
+```
+
+Watch the ArgoCD UI, staging updates, dev and prod are unchanged.
 
 ### Scenario 2: Add a ConfigMap to production
 
-Create `p4-multi-env-demo/overlays/prod/configmap.yaml` with environment-specific settings, then add it to the prod `kustomization.yaml` resources list. Commit and push.
+**Step 1:** Create a new file `p4-multi-env-demo/overlays/prod/configmap.yaml`:
 
-Only prod gets the ConfigMap.
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  environment: "production"
+  log_level: "info"
+```
+
+**Step 2:** Edit `p4-multi-env-demo/overlays/prod/kustomization.yaml` -- add `configmap.yaml` to the `resources:` list:
+
+```yaml
+resources:
+  - ../../base
+  - configmap.yaml          # <-- add this line
+```
+
+**Step 3:** Commit and push:
+
+```bash
+git add p4-multi-env-demo/overlays/prod/
+git commit -m "Add ConfigMap to production environment"
+git push origin main
+```
+
+Sync the prod environment. To use the CLI:
+
+```bash
+argocd app sync myapp-prod
+```
+
+**Step 4:** Verify that only prod has the ConfigMap:
+
+```bash
+kubectl get configmap -n prod
+kubectl get configmap -n dev
+kubectl get configmap -n staging
+```
+
+Only prod should show `myapp-config`. Dev and staging are unchanged.
 
 ### Scenario 3: Promote a base change
 
-Edit `p4-multi-env-demo/base/deployment.yaml` -- change the image to `nginx:1.27`:
+Edit `p4-multi-env-demo/base/deployment.yaml`, change the image to `nginx:1.27`:
 
 ```bash
 git add p4-multi-env-demo/base/deployment.yaml
 git commit -m "Update base nginx to 1.27"
 git push origin main
+```
+
+Sync all three environments. To use the CLI:
+
+```bash
+argocd app sync myapp-dev
+argocd app sync myapp-staging
+argocd app sync myapp-prod
 ```
 
 **What happens:**
@@ -168,16 +228,12 @@ To promote to staging: remove or update the image override in the staging overla
 | Automated | CI/CD updates overlays | Fast teams with good test coverage |
 | Branch-based | Merge dev -> staging -> main | Familiar Git workflow |
 
-For this tutorial we use **manual promotion** -- you control exactly when each environment changes.
+For this tutorial we use **manual promotion**, you control exactly when each environment changes.
 
 ## Key Takeaways
 
 - Kustomize base + overlays = DRY multi-environment config
 - ApplicationSets generate one Application per environment from a template
 - App of Apps manages the ApplicationSet from Git
-- Changes propagate through Git commits -- pure GitOps
+- Changes propagate through Git commits aka GitOps
 - The full arc: imperative -> declarative -> App of Apps -> ApplicationSets
-
----
-
-**Congratulations!** You've completed the ArgoCD GitOps tutorial.

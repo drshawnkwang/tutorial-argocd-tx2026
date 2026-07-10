@@ -37,12 +37,26 @@ argocd app create -f root-app.yaml
 
 In the ArgoCD UI you should see `root-apps`. Click on it, its resources include the `podinfo-helm` Application.
 
+Verify podinfo-helm is running:
+
+```bash
+curl localhost:30899 | jq '{message, color}'
+```
+
+You can also open `http://<your-vm-ip>:30899` in your browser -- you should see the green podinfo UI.
+
 ### Test the GitOps flow
 
-Edit `argocd-apps/podinfo-helm.yaml`, change the `ui.message` value. Commit and push. Then manually sync using the Web UI or
+Edit `argocd-apps/podinfo-helm.yaml`, change the `ui.message` value. Commit and push. Then manually sync using the Web UI or:
 
 ```bash
 argocd app sync podinfo-helm
+```
+
+Verify the message changed:
+
+```bash
+curl localhost:30899 | jq .message
 ```
 
 ## Exercise 2: ApplicationSets
@@ -66,15 +80,24 @@ git push origin main
 
 `root-apps` picks up the new file, creates the ApplicationSet, and the ApplicationSet creates a `podinfo-podinfo-appset` Application automatically.
 
+Verify:
+
+```bash
+curl localhost:30900 | jq '{message, color}'
+```
+
+You can also open `http://<your-vm-ip>:30900` in your browser -- you should see a red podinfo UI.
+
 ### See templating in action
 
-Edit `argocd-apps/appset-example.yaml` , add a second element to the list:
+Edit `argocd-apps/appset-example.yaml`, add a second element to the list, under the first:
 
 ```yaml
       - namespace: podinfo-appset-2
         message: "Second instance from AppSet!"
         color: "#ff6600"
         replicas: "1"
+        nodePort: "30901"
 ```
 
 ```bash
@@ -83,9 +106,18 @@ git commit -m "Add second podinfo instance via ApplicationSet"
 git push origin main
 ```
 
-A second Application appears. Removing an element from the list deletes the corresponding Application.
+```bash
+argocd app sync root-apps
+```
 
-### Clean up
+A second Application appears. Verify both instances:
+
+- Red: `http://<your-vm-ip>:30900`
+- Orange: `http://<your-vm-ip>:30901`
+
+Removing an element from the list deletes the corresponding Application.
+
+### Clean up (Optional)
 
 Remove the ApplicationSet from `argocd-apps/` and push , `root-apps` will prune it automatically:
 
