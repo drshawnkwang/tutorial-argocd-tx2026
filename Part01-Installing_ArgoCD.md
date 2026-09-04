@@ -61,12 +61,11 @@ helm install argocd argo/argo-cd \
   --wait
 ```
 
-> This file is in the repo you just cloned. It is tuned for our single-node k3s environment.
+> INFO: The argocd-values file is in the repo you just cloned. It is tuned for our single-node k3s environment.
 
 ### Step 3: Wait for pods
 
 ```bash
-kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
 kubectl get pods -n argocd
 ```
 
@@ -113,10 +112,10 @@ Get the initial admin password:
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
+Log in via the browser UI. Optionally change the password under User Info.
+
 - **Username:** `admin`
 - **Password:** (output from above)
-
-Log in via the browser UI. Optionally change the password under User Info.
 
 ## Verify
 
