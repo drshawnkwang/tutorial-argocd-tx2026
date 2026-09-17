@@ -12,6 +12,11 @@ spec:
             color: "#e74c3c"
             replicas: "1"
             nodePort: "32103"
+          - namespace: podinfo-appset-2
+            message: "Second instance from AppSet!"
+            color: "#ff6600"
+            replicas: "1"
+            nodePort: "32104"
   template:
     metadata:
       name: 'podinfo-{{namespace}}'
