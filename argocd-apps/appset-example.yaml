@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo-appset
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - namespace: podinfo-appset
+            message: "Deployed by ApplicationSet!"
+            color: "#e74c3c"
+            replicas: "1"
+            nodePort: "32103"
+  template:
+    metadata:
+      name: 'podinfo-{{namespace}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://stefanprodan.github.io/podinfo
+        chart: podinfo
+        targetRevision: 6.15.0
+        helm:
+          valuesObject:
+            replicaCount: '{{replicas}}'
+            ui:
+              color: '{{color}}'
+              message: '{{message}}'
+            service:
+              type: NodePort
+              nodePort: '{{nodePort}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
