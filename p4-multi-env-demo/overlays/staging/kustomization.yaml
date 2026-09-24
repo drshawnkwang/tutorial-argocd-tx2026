@@ -8,9 +8,6 @@ resources:
 
 namePrefix: staging-
 
-commonLabels:
-  environment: staging
-
 patches:
   - patch: |-
       - op: replace

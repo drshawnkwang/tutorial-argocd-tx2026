@@ -123,8 +123,7 @@ Expected: dev = 1 replica, staging = 2, prod = 3.
 Edit `p4-multi-env-demo/overlays/staging/kustomization.yaml`. Add an `images:` block -- this is a top-level Kustomize key, at the same indentation level as `namespace:`, `resources:`, and `patches:`. Add it before the `patches:` block:
 
 ```yaml
-commonLabels:
-  environment: staging
+namePrefix: staging-
 
 images:                    # <-- add this block
 - name: nginx

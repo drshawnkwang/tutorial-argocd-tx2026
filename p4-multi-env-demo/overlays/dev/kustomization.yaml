@@ -8,9 +8,6 @@ resources:
 
 namePrefix: dev-
 
-commonLabels:
-  environment: dev
-
 patches:
   - patch: |-
       - op: replace
