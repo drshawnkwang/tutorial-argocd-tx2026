@@ -17,7 +17,7 @@ spec:
           message: "Helm-deployed podinfo!"
         service:
           type: NodePort
-          nodePort: 30899
+          nodePort: 32899
   destination:
     server: https://kubernetes.default.svc
     namespace: podinfo-helm

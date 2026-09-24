@@ -9,7 +9,7 @@ spec:
   ports:
     - port: 9898
       targetPort: 9898
-      nodePort: 30898
+      nodePort: 32098
       name: http
   selector:
     app: podinfo

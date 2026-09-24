@@ -62,12 +62,12 @@ argocd app sync podinfo
 
 ```bash
 kubectl get pods -l app=podinfo
-curl localhost:30898 | jq .
+curl localhost:32098 | jq .
 ```
 
 You should see podinfo's JSON response with version `6.13.0`.
 
-The podinfo service is exposed as a NodePort on port **30898**. You can also open `http://<your-vm-ip>:30898` in your browser to see the podinfo web UI.
+The podinfo service is exposed as a NodePort on port **32098**. You can also open `http://<your-vm-ip>:32098` in your browser to see the podinfo web UI.
 
 ## Exercise 2: Enable Auto-Sync and Self-Heal
 
@@ -142,11 +142,11 @@ git push origin main
 Verify (after ArgoCD syncs):
 
 ```bash
-curl localhost:30898 | jq '{version, message}'
+curl localhost:32098 | jq '{version, message}'
 # Should show version "6.14.0" and message "Hello from ArgoCD tutorial!"
 ```
 
-You can also refresh `http://<your-vm-ip>:30898` in your browser, the message should appear in the podinfo web UI.
+You can also refresh `http://<your-vm-ip>:32098` in your browser, the message should appear in the podinfo web UI.
 
 This demonstrates that a single Git push can make multiple changes atomically. ArgoCD syncs the full desired state, not individual edits.
 
@@ -187,14 +187,14 @@ argocd app sync podinfo-helm
 
 ```bash
 kubectl get pods -n podinfo-helm
-curl localhost:30899 | jq .message
+curl localhost:32899 | jq .message
 # Should show "Helm-deployed podinfo!"
 ```
 
 You now have two podinfo instances:
 
-- Plain manifests: `http://<your-vm-ip>:30898`
-- Helm chart: `http://<your-vm-ip>:30899`
+- Plain manifests: `http://<your-vm-ip>:32098`
+- Helm chart: `http://<your-vm-ip>:32899`
 
 Open both in your browser to compare.
 

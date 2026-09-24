@@ -45,10 +45,10 @@ In the ArgoCD UI you should see `root-apps`. Click on it, its resources include 
 Verify podinfo-helm is running:
 
 ```bash
-curl localhost:30899 | jq '{message, color}'
+curl localhost:32899 | jq '{message, color}'
 ```
 
-You can also open `http://<your-vm-ip>:30899` in your browser -- you should see the green podinfo UI.
+You can also open `http://<your-vm-ip>:32899` in your browser -- you should see the green podinfo UI.
 
 ### Test the GitOps flow
 
@@ -61,7 +61,7 @@ argocd app sync podinfo-helm
 Verify the message changed:
 
 ```bash
-curl localhost:30899 | jq .message
+curl localhost:32899 | jq .message
 ```
 
 ## Exercise 2: ApplicationSets
@@ -88,10 +88,10 @@ git push origin main
 Verify:
 
 ```bash
-curl localhost:30900 | jq '{message, color}'
+curl localhost:32900 | jq '{message, color}'
 ```
 
-You can also open `http://<your-vm-ip>:30900` in your browser -- you should see a red podinfo UI.
+You can also open `http://<your-vm-ip>:32900` in your browser -- you should see a red podinfo UI.
 
 ### See templating in action
 
@@ -102,7 +102,7 @@ Edit `argocd-apps/appset-example.yaml`, add a second element to the list, under 
         message: "Second instance from AppSet!"
         color: "#ff6600"
         replicas: "1"
-        nodePort: "30901"
+        nodePort: "32901"
 ```
 
 ```bash
@@ -117,8 +117,8 @@ argocd app sync root-apps
 
 A second Application appears. Verify both instances:
 
-- Red: `http://<your-vm-ip>:30900`
-- Orange: `http://<your-vm-ip>:30901`
+- Red: `http://<your-vm-ip>:32900`
+- Orange: `http://<your-vm-ip>:32901`
 
 Removing an element from the list deletes the corresponding Application.
 

@@ -99,10 +99,10 @@ Open `https://localhost:8443` in your browser. Accept the self-signed certificat
 If the SSH tunnel does not work, you can expose ArgoCD via a NodePort instead:
 
 ```bash
-kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 443, "targetPort": 8443, "nodePort": 30443}]}}'
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 443, "targetPort": 8443, "nodePort": 32443}]}}'
 ```
 
-Open `https://<your-vm-ip>:30443` in your browser. Accept the self-signed certificate warning (requires that port 30443 is open in your VM's firewall).
+Open `https://<your-vm-ip>:32443` in your browser. Accept the self-signed certificate warning (requires that port 32443 is open in your VM's firewall).
 
 ## Log In
 
@@ -131,7 +131,7 @@ argocd cluster list
 **If using NodePort:**
 
 ```bash
-argocd login <your-vm-ip>:30443 --insecure
+argocd login <your-vm-ip>:32443 --insecure
 argocd cluster list
 ```
 
