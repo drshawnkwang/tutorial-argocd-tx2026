@@ -20,6 +20,7 @@ cd ~/tutorial-argocd-tx2026
 cp p2-podinfo-helm/app.yaml.sample argocd-apps/podinfo-helm.yaml
 git add argocd-apps/
 git commit -m "Add podinfo-helm to argocd-apps"
+git push
 ```
 
 ### Create the root Application
@@ -41,6 +42,13 @@ argocd app create -f root-app.yaml
 ### Verify
 
 In the ArgoCD UI you should see `root-apps`. Click on it, its resources include the `podinfo-helm` Application.
+
+`root-apps` created the `podinfo-helm` Application, but that Application has no auto-sync, so nothing is deployed yet -- it shows **OutOfSync** / **Missing**. Sync it by hand:
+
+```bash
+argocd app list
+argocd app sync podinfo-helm
+```
 
 Verify podinfo-helm is running:
 
@@ -81,6 +89,12 @@ cp argocd-apps/appset-example.yaml.sample argocd-apps/appset-example.yaml
 git add argocd-apps/appset-example.yaml
 git commit -m "Add podinfo ApplicationSet to root-apps"
 git push origin main
+```
+
+You may need to sync the ArgoCD root-apps manually:
+
+```bash
+argocd app sync root-apps
 ```
 
 `root-apps` picks up the new file, creates the ApplicationSet, and the ApplicationSet creates a `podinfo-podinfo-appset` Application automatically.
