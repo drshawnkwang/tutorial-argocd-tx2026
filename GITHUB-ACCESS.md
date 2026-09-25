@@ -1,30 +1,51 @@
 # GitHub Access for This Tutorial
 
-Throughout this tutorial you'll edit YAML files, commit, and push to your forked GitHub repo. ArgoCD on your VM watches the repo and syncs changes automatically. Choose one of the three options below for how to do the Git work.
+Throughout this tutorial you'll edit YAML files, commit, and push to your forked GitHub repo. ArgoCD on your student VM watches the repo and syncs changes automatically. Choose one of the four options below for how to do the Git work.
+
+## How to Read the Command Blocks
+
+Every command block in Parts II-IV is labeled with where to run it:
+
+- **Laptop (Git)** : editing files, `git add`, `git commit`, `git push`
+- **(Student ) VM Terminal 1** : `kubectl`, `argocd`, `curl`
+
+If you chose **Option A or B** below, these are two different machines and you will switch between them. If you chose **Option C or D**, you do everything on the VM, so run the **Laptop (Git)** blocks on the student VM as well.
+
+### Which files are Git-managed?
+
+The tutorial has you copy several `.sample` files. Two different things are going on, and the label on each block tells you which:
+
+| File | Where it lives | Committed to Git? |
+| --- | --- | --- |
+| Anything in `argocd-apps/` | Laptop (your clone) | **Yes** : this is how ArgoCD sees it |
+| `p2-podinfo-helm/app.yaml` | VM only | No |
+| `root-app.yaml` | VM only | No |
+
+Files under `argocd-apps/` are read by the `root-apps` Application, so they only take effect once pushed to GitHub. The other two are applied directly with `argocd app create -f`, so they never need to be committed. If you are working entirely on the VM (Option C or D), `git status` will list them as untracked; that is expected, just leave them alone.
 
 ## Option A: Edit and Push from Your Laptop (Recommended)
 
 You edit files and run Git commands on your laptop using your preferred editor and whatever GitHub authentication you already have (SSH keys, credential manager, GitHub Desktop, etc.). kubectl and argocd commands run on the VM.
 
 - **Laptop:** edit files, `git add`, `git commit`, `git push`
-- **VM:** `kubectl`, `argocd`, `curl`
+- **Student VM:** `kubectl`, `argocd`, `curl`
 - **When the VM needs updated files** (one time in Part III): run `git pull` on the VM
 
 This is the recommended approach because you use your own editor and your existing GitHub auth, and there is no extra setup on the VM.
 
 ## Option B: Edit on GitHub.com with the Browser Editor
 
-If you don't have Git installed locally, you can edit files directly on GitHub. Navigate to your forked repo and press `.` (period) to open a VS Code editor in your browser. Use the Source Control panel (Git icon in the left sidebar) to stage, commit, and push changes.
+If you don't have Git installed locally, you can edit files directly on GitHub. Navigate to your forked repo and press `.` (period) to open a VS Code editor in your browser. Use the Source Control panel (Git icon in the left sidebar, looks like three circles connceted by lines, like the letter 'Y') to stage, commit, and push changes.
 
 - **Browser:** edit files, commit, push (via github.dev VS Code editor)
-- **VM:** `kubectl`, `argocd`, `curl`
+- **Student VM:** `kubectl`, `argocd`, `curl`
 - **When the VM needs updated files** (one time in Part III): run `git pull` on the VM
 
 This assumes you are confortable with Github's VS code editor.
 
-## Option C: Edit and Push from the VM Using a GitHub PAT
+## Option C: Edit and Push from the Student VM Using a GitHub PAT
 
-You do everything on the VM over SSH. You'll need a GitHub Personal Access Token (PAT) to push.
+You do everything on the Student VM over SSH. You'll need a GitHub Personal Access Token (PAT) to push.
 
 **Before the tutorial:**
 
@@ -42,9 +63,9 @@ git config --global user.email "your@email.com"
 
 On the VM, on your first `git push`, enter your GitHub username and the PAT as the password. It will be cached for subsequent pushes.
 
-## Option D: Edit and Push from the VM Using SSH Agent Forwarding
+## Option D: Edit and Push from the Student VM Using SSH Agent Forwarding
 
-If you have SSH keys configured with GitHub on your laptop, you can forward your SSH agent to the VM:
+If you have SSH keys configured with GitHub on your laptop, you can forward your SSH agent to the Student VM:
 
 ```bash
 # Connect with agent forwarding
@@ -62,9 +83,9 @@ Your laptop's SSH key is used for GitHub auth without storing credentials on the
 
 | | Option A: Laptop | Option B: GitHub.dev | Option C: VM + PAT | Option D: VM + SSH agent |
 | --- | --- | --- | --- | --- |
-| Edit files on | Laptop | Browser | VM | VM |
-| Git push from | Laptop | Browser | VM | VM |
+| Edit files on | Laptop | Browser | Student VM | Student VM |
+| Git push from | Laptop | Browser | Student VM | Student VM |
 | Pre-setup needed | None (use existing Git auth) | None | Create a GitHub PAT | SSH keys configured with GitHub |
-| Editor | Your choice | VS Code in browser | vim/nano on VM | vim/nano on VM |
+| Editor | Your choice | VS Code in browser | vim/nano on Student VM | vim/nano on Student VM |
 
 Please pick whichever you're most comfortable with.

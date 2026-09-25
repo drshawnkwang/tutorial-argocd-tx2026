@@ -9,11 +9,15 @@
 
 **Git is the single source of truth.**
 
+> **Where do I run this?** Every command block below is labeled **Laptop (Git)** or (Student) **VM Terminal 1**. If you chose Option C or D in the [GitHub Access Guide](GITHUB-ACCESS.md), run everything on the Student VM.
+
 ## Exercise 1: Deploy Your First Application
 
 ### Verify your repo
 
 You forked and cloned the tutorial repo in Part I. Make sure you are in the repo directory:
+
+**VM Terminal 1:**
 
 ```bash
 cd ~/tutorial-argocd-tx2026
@@ -36,7 +40,7 @@ The repo contains a `p2-podinfo/` directory with a Deployment and Service for [p
    - Namespace: `default`
 3. Click **CREATE**
 
-**Or via CLI:**
+**Or via CLI, on the VM Terminal 1:**
 
 ```bash
 argocd app create podinfo \
@@ -52,13 +56,15 @@ The app shows **OutOfSync**, Git has manifests but nothing is deployed yet.
 
 1. Click **SYNC** then **SYNCHRONIZE** in the UI
 
-Or via CLI:
+Or via CLI, on the **VM Terminal 1**:
 
 ```bash
 argocd app sync podinfo
 ```
 
 ### Verify
+
+**VM Terminal 1:**
 
 ```bash
 kubectl get pods -l app=podinfo
@@ -77,7 +83,7 @@ In the ArgoCD UI: click on the `podinfo` app -> **DETAILS** -> **Edit** -> **Syn
 
 Click **Save**.
 
-Or via CLI:
+Or via CLI, on the **VM Terminal 1**:
 
 ```bash
 argocd app set podinfo --sync-policy automated --auto-prune --self-heal
@@ -87,6 +93,8 @@ argocd app set podinfo --sync-policy automated --auto-prune --self-heal
 
 Edit `p2-podinfo/deployment.yaml`; change `replicas: 1` to `replicas: 3`:
 
+**Laptop (Git):**
+
 ```bash
 # Edit the file, then:
 (editor) p2-podinfo/deployment.yaml
@@ -95,7 +103,9 @@ git commit -m "Scale podinfo to 3 replicas"
 git push origin main
 ```
 
-Watch ArgoCD detect the change and create new pods (may take up to 3 minutes):
+Now switch to the VM. Watch ArgoCD detect the change and create new pods (may take up to 3 minutes). Press `Ctrl-C` to stop watching:
+
+**VM Terminal 1:**
 
 ```bash
 kubectl get pods -l app=podinfo -w
@@ -103,7 +113,9 @@ kubectl get pods -l app=podinfo -w
 
 ### Test self-heal
 
-Manually scale the deployment (drift from Git):
+Manually scale the deployment (drift from Git). This is a live cluster change, so there is no Git step here:
+
+**VM Terminal 1:**
 
 ```bash
 kubectl scale deployment podinfo --replicas=5
@@ -113,6 +125,8 @@ kubectl get pods -l app=podinfo
 Watch ArgoCD detect the drift and scale back to 3. **Git always wins.**
 
 ## Exercise 3: Make Changes via Git
+
+All the editing and Git work in this exercise happens in one place, then you switch to the VM once to verify.
 
 Edit `p2-podinfo/deployment.yaml`; make two changes:
 
@@ -133,13 +147,17 @@ Edit `p2-podinfo/deployment.yaml`; make two changes:
 
 Commit and push both changes together:
 
+**Laptop (Git):**
+
 ```bash
 git add p2-podinfo/deployment.yaml
 git commit -m "Upgrade podinfo to 6.14.0 and set custom message"
 git push origin main
 ```
 
-Verify (after ArgoCD syncs):
+Now switch to the VM and verify (after ArgoCD syncs):
+
+**VM Terminal 1:**
 
 ```bash
 curl localhost:32098 | jq '{version, message}'
@@ -165,6 +183,10 @@ ArgoCD can also deploy Helm charts from upstream repositories. The template repo
 
 ### Review and activate the sample
 
+This whole exercise runs on the Student VM. Unlike the earlier exercises, `app.yaml` is applied directly with `argocd app create -f`, so it never gets committed or pushed.
+
+**VM Terminal 1:**
+
 ```bash
 cd ~/tutorial-argocd-tx2026/p2-podinfo-helm
 cat app.yaml.sample
@@ -172,11 +194,17 @@ cat app.yaml.sample
 
 This manifest points ArgoCD at the upstream podinfo Helm chart (not your Git repo). It uses **manual sync** (no auto-sync), we'll use this in Part III to practice rollbacks.
 
+**VM Terminal 1:**
+
 ```bash
 cp app.yaml.sample app.yaml
 ```
 
+> This copy stays on the VM. Do not commit it. In Part III you'll copy the same sample into `argocd-apps/` instead, and that one **does** get committed.
+
 ### Create the Application
+
+**VM Terminal 1:**
 
 ```bash
 argocd app create -f app.yaml
@@ -184,6 +212,8 @@ argocd app sync podinfo-helm
 ```
 
 ### Verify (again)
+
+**VM Terminal 1:**
 
 ```bash
 kubectl get pods -n podinfo-helm
@@ -200,7 +230,9 @@ Open both in your browser to compare.
 
 ### Modify Helm values
 
-Edit `p2-podinfo-helm/app.yaml`; change the `ui.color` or `ui.message`, then re-apply:
+Edit `p2-podinfo-helm/app.yaml`; change the `ui.color` or `ui.message`, then re-apply. Because this file is VM-local, you edit it on the VM with `vim` or `nano`, with no Git step:
+
+**VM Terminal 1:**
 
 ```bash
 (editor) p2-podinfo-helm/app.yaml
@@ -221,6 +253,8 @@ ArgoCD handles both. In production you'll use a mix.
 ## Cleanup
 
 Before moving to Part III, delete both Applications from Part II:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app delete podinfo --cascade

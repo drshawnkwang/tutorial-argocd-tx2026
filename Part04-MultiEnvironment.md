@@ -1,5 +1,7 @@
 # Part IV: Multi-Environment Deployments
 
+> **Where do I run this?** Every command block below is labeled **Laptop (Git)** or (Student) **VM Terminal 1**. If you chose Option C or D in the [GitHub Access Guide](GITHUB-ACCESS.md), run everything on the Student VM.
+
 ## Why Multiple Environments?
 
 Real-world applications run in multiple environments:
@@ -30,6 +32,8 @@ p4-multi-env-demo/
 
 Your forked repo already includes a fully populated `p4-multi-env-demo/` directory. Explore it:
 
+**VM Terminal 1:**
+
 ```bash
 cd ~/tutorial-argocd-tx2026
 find p4-multi-env-demo -type f | sort
@@ -51,7 +55,9 @@ find p4-multi-env-demo -type f | sort
 
 ### Test Kustomize locally
 
-Preview what each environment produces:
+Preview what each environment produces. `kustomize` is built into `kubectl`, so run this on the VM:
+
+**VM Terminal 1:**
 
 ```bash
 cd ~/tutorial-argocd-tx2026/p4-multi-env-demo
@@ -62,6 +68,8 @@ kubectl kustomize overlays/prod
 ```
 
 Compare replica counts:
+
+**VM Terminal 1:**
 
 ```bash
 kubectl kustomize overlays/dev | grep replicas
@@ -76,6 +84,8 @@ You should see 1, 2, and 3.
 We'll deploy all three environments with a single ApplicationSet, managed by the App of Apps pattern from Part III.
 
 ### Activate the ApplicationSet
+
+**Laptop (Git):**
 
 ```bash
 cd ~/tutorial-argocd-tx2026
@@ -102,6 +112,10 @@ One git push creates three environments.
 
 ### Verify
 
+Switch to the VM:
+
+**VM Terminal 1:**
+
 ```bash
 argocd app list
 
@@ -120,7 +134,7 @@ Expected: dev = 1 replica, staging = 2, prod = 3.
 
 ### Scenario 1: Update image in staging only
 
-Edit `p4-multi-env-demo/overlays/staging/kustomization.yaml`. Add an `images:` block -- this is a top-level Kustomize key, at the same indentation level as `namespace:`, `resources:`, and `patches:`. Add it before the `patches:` block:
+On your **laptop**, edit `p4-multi-env-demo/overlays/staging/kustomization.yaml`. Add an `images:` block -- this is a top-level Kustomize key, at the same indentation level as `namespace:`, `resources:`, and `patches:`. Add it before the `patches:` block:
 
 ```yaml
 namePrefix: staging-
@@ -133,13 +147,17 @@ patches:
   - patch: |-
 ```
 
+**Laptop (Git):**
+
 ```bash
 git add p4-multi-env-demo/overlays/staging/kustomization.yaml
 git commit -m "Update staging to nginx 1.26-alpine"
 git push origin main
 ```
 
-Sync all the staging environment. To use the CLI:
+Switch to the VM and sync the staging environment. To use the CLI:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync myapp-staging
@@ -148,6 +166,8 @@ argocd app sync myapp-staging
 Watch the ArgoCD UI, staging updates, dev and prod are unchanged.
 
 ### Scenario 2: Add a ConfigMap to production
+
+Steps 1 through 3 are all done on your **laptop**.
 
 **Step 1:** Create a new file `p4-multi-env-demo/overlays/prod/configmap.yaml`:
 
@@ -171,19 +191,25 @@ resources:
 
 **Step 3:** Commit and push:
 
+**Laptop (Git):**
+
 ```bash
 git add p4-multi-env-demo/overlays/prod/
 git commit -m "Add ConfigMap to production environment"
 git push origin main
 ```
 
-Sync the prod environment. To use the CLI:
+Switch to the VM and sync the prod environment. To use the CLI:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync myapp-prod
 ```
 
 **Step 4:** Verify that only prod has the ConfigMap:
+
+**VM Terminal 1:**
 
 ```bash
 kubectl get configmap -n prod
@@ -195,7 +221,9 @@ Only prod should show `myapp-config`. Dev and staging are unchanged.
 
 ### Scenario 3: Promote a base change
 
-Edit `p4-multi-env-demo/base/deployment.yaml`, change the image to `nginx:1.27`:
+On your **laptop**, edit `p4-multi-env-demo/base/deployment.yaml` and change the image to `nginx:1.27`:
+
+**Laptop (Git):**
 
 ```bash
 git add p4-multi-env-demo/base/deployment.yaml
@@ -203,7 +231,9 @@ git commit -m "Update base nginx to 1.27"
 git push origin main
 ```
 
-Sync all three environments. To use the CLI:
+Switch to the VM and sync all three environments. To use the CLI:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync myapp-dev

@@ -1,5 +1,7 @@
 # Part III: Advanced Topics
 
+> **Where do I run this?** Every command block below is labeled **Laptop (Git)** or (Student) **VM Terminal 1**. Part III switches between them more than the other parts, so watch the labels. If you chose Option C or D in the [GitHub Access Guide](GITHUB-ACCESS.md), run everything on the Student VM.
+
 ## Exercise 1: App of Apps
 
 So far you've created Applications using the ArgoCD UI or CLI. The **App of Apps** pattern lets ArgoCD manage Application definitions from using GitOps.
@@ -8,26 +10,28 @@ So far you've created Applications using the ArgoCD UI or CLI. The **App of Apps
 
 A single "root" Application watches a directory in your repo. Any Application (or ApplicationSet) YAML you put in that directory gets automatically created by ArgoCD. Remove the file, and the Application is deleted.
 
-### Set up the argocd-apps directory
+### Add podinfo-helm to the argocd-apps directory
+
+This file goes in `argocd-apps/`, so it **must** be committed and pushed. ArgoCD reads it from GitHub, not from your local disk.
+
+**Laptop (Git):**
 
 ```bash
 cd ~/tutorial-argocd-tx2026
-```
-
-### Add podinfo-helm to the argocd-apps directory
-
-```bash
 cp p2-podinfo-helm/app.yaml.sample argocd-apps/podinfo-helm.yaml
 git add argocd-apps/
 git commit -m "Add podinfo-helm to argocd-apps"
-git push
+git push origin main
 ```
 
 ### Create the root Application
 
-> If you're editing and pushing files from your laptop (Option A in the [GitHub Access Guide](GITHUB-ACCESS.md)), run `git pull` on the VM first to get the latest changes.
+Now switch to the Student VM. The `git pull` brings down the file you just pushed. Unlike that file, `root-app.yaml` stays on the Student VM and is never committed:
+
+**VM Terminal 1:**
 
 ```bash
+cd ~/tutorial-argocd-tx2026
 git pull
 cp root-app.yaml.sample root-app.yaml
 # Edit root-app.yaml: replace <your-username> with your GitHub username
@@ -45,12 +49,16 @@ In the ArgoCD UI you should see `root-apps`. Click on it, its resources include 
 
 `root-apps` created the `podinfo-helm` Application, but that Application has no auto-sync, so nothing is deployed yet -- it shows **OutOfSync** / **Missing**. Sync it by hand:
 
+**VM Terminal 1:**
+
 ```bash
 argocd app list
 argocd app sync podinfo-helm
 ```
 
 Verify podinfo-helm is running:
+
+**VM Terminal 1:**
 
 ```bash
 curl localhost:32899 | jq '{message, color}'
@@ -60,15 +68,23 @@ You can also open `http://<your-vm-ip>:32899` in your browser -- you should see 
 
 ### Test the GitOps flow
 
-Edit `argocd-apps/podinfo-helm.yaml`, change the `ui.message` value. Commit and push. Then manually sync using the Web UI or:
+Change the `ui.message` value, then commit and push:
+
+**Laptop (Git):**
+
+```bash
+(editor) argocd-apps/podinfo-helm.yaml
+git add argocd-apps/podinfo-helm.yaml
+git commit -m "Change podinfo-helm UI message"
+git push origin main
+```
+
+Back on the VM, manually sync (or use the **SYNC** button in the Web UI) and verify the message changed:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync podinfo-helm
-```
-
-Verify the message changed:
-
-```bash
 curl localhost:32899 | jq .message
 ```
 
@@ -84,6 +100,8 @@ Look at `argocd-apps/appset-example.yaml.sample` in your repo. It uses a **List 
 
 Copy the sample to remove the `.sample` suffix, then commit and push:
 
+**Laptop (Git):**
+
 ```bash
 cp argocd-apps/appset-example.yaml.sample argocd-apps/appset-example.yaml
 git add argocd-apps/appset-example.yaml
@@ -91,7 +109,9 @@ git commit -m "Add podinfo ApplicationSet to root-apps"
 git push origin main
 ```
 
-You may need to sync the ArgoCD root-apps manually:
+Switch to the VM. You may need to sync the ArgoCD root-apps manually:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync root-apps
@@ -101,6 +121,8 @@ argocd app sync root-apps
 
 Verify:
 
+**VM Terminal 1:**
+
 ```bash
 curl localhost:32900 | jq '{message, color}'
 ```
@@ -109,7 +131,7 @@ You can also open `http://<your-vm-ip>:32900` in your browser -- you should see 
 
 ### See templating in action
 
-Edit `argocd-apps/appset-example.yaml`, add a second element to the list, under the first:
+On your **laptop**, edit `argocd-apps/appset-example.yaml` and add a second element to the list, under the first:
 
 ```yaml
       - namespace: podinfo-appset-2
@@ -119,11 +141,15 @@ Edit `argocd-apps/appset-example.yaml`, add a second element to the list, under 
         nodePort: "32901"
 ```
 
+**Laptop (Git):**
+
 ```bash
 git add argocd-apps/appset-example.yaml
 git commit -m "Add second podinfo instance via ApplicationSet"
 git push origin main
 ```
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync root-apps
@@ -140,6 +166,8 @@ Removing an element from the list deletes the corresponding Application.
 
 Remove the ApplicationSet from `argocd-apps/` and push , `root-apps` will prune it automatically:
 
+**Laptop (Git):**
+
 ```bash
 git rm argocd-apps/appset-example.yaml
 git commit -m "Remove podinfo ApplicationSet"
@@ -152,6 +180,8 @@ The `podinfo-helm` Application has **no auto-sync** , rollbacks will stick.
 
 ### Confirm no auto-sync
 
+**VM Terminal 1:**
+
 ```bash
 argocd app get podinfo-helm | grep "Sync Policy"
 ```
@@ -160,6 +190,8 @@ argocd app get podinfo-helm | grep "Sync Policy"
 
 Edit `argocd-apps/podinfo-helm.yaml` , change `targetRevision` to `99.99.99` (a version that doesn't exist):
 
+**Laptop (Git):**
+
 ```bash
 (editor) argocd-apps/podinfo-helm.yaml
 git add argocd-apps/podinfo-helm.yaml
@@ -167,7 +199,9 @@ git commit -m "Break podinfo-helm with invalid chart version"
 git push origin main
 ```
 
-Then trigger the sync:
+Back on the VM, trigger the sync:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app get root-apps --refresh
@@ -175,6 +209,8 @@ argocd app sync podinfo-helm
 ```
 
 The sync fails. Check the error:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app get podinfo-helm
@@ -191,6 +227,8 @@ The rollback **sticks** because there's no auto-sync to override it.
 
 ### Rollback via CLI (alternative)
 
+**VM Terminal 1:**
+
 ```bash
 argocd app history podinfo-helm
 argocd app rollback podinfo-helm
@@ -199,6 +237,8 @@ argocd app rollback podinfo-helm
 ### Fix Git
 
 Even though the rollback worked, Git still has the broken version. Fix it:
+
+**Laptop (Git):**
 
 ```bash
 git revert HEAD
@@ -228,6 +268,8 @@ Waves are set via `argocd.argoproj.io/sync-wave` annotations. Hooks are set via 
 
 ### Deploy via App of Apps (again)
 
+**Laptop (Git):**
+
 ```bash
 cp p3-sync-waves-demo/app-sync-wave-demo.yaml.sample argocd-apps/app-sync-wave-demo.yaml
 # Edit: replace <your-username> with your GitHub username
@@ -237,7 +279,9 @@ git commit -m "Add sync-waves-demo to root-apps"
 git push origin main
 ```
 
-Then sync the demo:
+Switch to the VM, then sync the demo:
+
+**VM Terminal 1:**
 
 ```bash
 argocd app sync root-apps
